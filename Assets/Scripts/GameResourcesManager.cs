@@ -5,6 +5,7 @@ using UnityEngine;
 public class GameResourcesManager : MonoBehaviour
 {
     public Color[] HexTileColors;
+    public Color SelectionColor;
     public int GameBoardWidth, GameBoardHeight;
     // Start is called before the first frame update
     public HexTile HexTilePrefab;

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5734218289945221292}
   - component: {fileID: 5098636136715507977}
   m_Layer: 8
-  m_Name: HexTile
+  m_Name: HexTile_Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -108,7 +108,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.004181713, y: -0.008363724}
+  m_Offset: {x: 0, y: 0.002090454}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -119,7 +119,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.8367409, y: 0.9454651}
+  m_Size: {x: 1.238183, y: 1.0918236}
   m_EdgeRadius: 0
 --- !u!50 &5098636136715507977
 Rigidbody2D:

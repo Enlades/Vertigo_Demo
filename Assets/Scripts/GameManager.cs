@@ -1,18 +1,24 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class GameManager : MonoBehaviour
 {
     public GameResourcesManager GRM;
     public BoardController BC;
     public InputHandler IH;
+    public SelectionController SC;
 
     private HexTile[][] _gameTiles;
+    private Action<Vector3, HexTile[]> _selectionAction;
 
     private void Awake(){
+        _selectionAction += HexSelectCallback;
+
         BC.Init(GRM.HexTilePrefab);
-        IH.Init(LayerMask.NameToLayer(GRM.HexTileLayerMask.ToString()));
+        IH.Init(LayerMask.NameToLayer(GRM.HexTileLayerMask.ToString()), _selectionAction);
+        SC.Init(GRM.HexTilePrefab, GRM.SelectionColor);
 
         InitGame();
     }
@@ -28,13 +34,10 @@ public class GameManager : MonoBehaviour
     }
 
     private void Update(){
-        if(Input.GetMouseButtonDown(0)){
-            HexTile selectedHexTile = null;
-            bool hexHit = IH.SelectHexTile(Camera.main.ScreenToWorldPoint(Input.mousePosition), out selectedHexTile);
+        IH.Tick();
+    }
 
-            if(hexHit){
-                Debug.Log(selectedHexTile.name);
-            }
-        }
+    private void HexSelectCallback(Vector3 p_inputPosition, HexTile[] p_selectedTiles){
+        SC.HandleSelection(p_inputPosition, p_selectedTiles);
     }
 }
