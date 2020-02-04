@@ -4,13 +4,22 @@ using UnityEngine;
 
 public class HexTile : MonoBehaviour
 {
+    public Color HexTileColor{get; private set;}
     private HexTile[] _connectedTiles;
 
-    public void SetColor(){
+    private SpriteRenderer _spriteRenderer;
+    
+    private void Awake(){
+        _spriteRenderer = GetComponent<SpriteRenderer>();
 
+        _connectedTiles = new HexTile[6];
     }
-
-    public void SetConnection(HexTile p_tile, HexTileDirection p_direction){
+    
+    public void Init(Color p_color){
+        HexTileColor = p_color;
+        _spriteRenderer.color = p_color;
+    }
+    public void SetConnection(HexTileDirection p_direction, HexTile p_tile){
         if(_connectedTiles[(int)p_direction] != null){
             Debug.LogWarning("Overwriting an already existing Hex connection");
             return;
