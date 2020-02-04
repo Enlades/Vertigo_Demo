@@ -6,6 +6,7 @@ public class HexTile : MonoBehaviour
 {
     public Color HexTileColor{get; private set;}
     public HexTile[] ConnectedTiles{get; private set;}
+    public Vector2Int BoardPosition{get; private set;}
 
     private SpriteRenderer _spriteRenderer;
     
@@ -14,8 +15,13 @@ public class HexTile : MonoBehaviour
 
         ConnectedTiles = new HexTile[6];
     }
+
+    public void SetBoardPosition(Vector2Int p_position){
+        name = "HexTile_" + p_position.x + "_" + p_position.y;
+        BoardPosition = p_position;
+    }
     
-    public void Init(Color p_color){
+    public void SetColor(Color p_color){
         HexTileColor = p_color;
         _spriteRenderer.color = p_color;
     }

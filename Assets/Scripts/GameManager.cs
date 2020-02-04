@@ -11,13 +11,20 @@ public class GameManager : MonoBehaviour
     public SelectionController SC;
 
     private HexTile[][] _gameTiles;
+
     private Action<Vector3, HexTile[]> _selectionAction;
+    private Action<bool> _swipeAction;
+    private Func<Vector2> _transferSelectionPositionAction;
 
     private void Awake(){
         _selectionAction += HexSelectCallback;
+        _transferSelectionPositionAction += TransferSelectionPositionCallback;
+        _swipeAction += SwipeCallback;
 
         BC.Init(GRM.HexTilePrefab);
-        IH.Init(LayerMask.NameToLayer(GRM.HexTileLayerMask.ToString()), _selectionAction);
+        IH.Init(LayerMask.NameToLayer(GRM.HexTileLayerMask.ToString())
+        , _selectionAction, _transferSelectionPositionAction, _swipeAction);
+        
         SC.Init(GRM.HexTilePrefab, GRM.SelectionColor);
 
         InitGame();
@@ -28,7 +35,7 @@ public class GameManager : MonoBehaviour
 
         for(int i = 0; i < _gameTiles.Length; i++){
             for(int j = 0; j < _gameTiles[i].Length; j++){
-                _gameTiles[i][j].Init(GRM.GetRandomColor());
+                _gameTiles[i][j].SetColor(GRM.GetRandomColor());
             }
         }
     }
@@ -39,5 +46,13 @@ public class GameManager : MonoBehaviour
 
     private void HexSelectCallback(Vector3 p_inputPosition, HexTile[] p_selectedTiles){
         SC.HandleSelection(p_inputPosition, p_selectedTiles);
+    }
+
+    private Vector2 TransferSelectionPositionCallback(){
+        return SC.GetSelectionPosition();
+    }
+
+    private void SwipeCallback(bool p_isClockwise){
+        BC.RotateTiles(SC.GetSelectedTiles(), p_isClockwise);
     }
 }

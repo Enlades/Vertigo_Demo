@@ -13,10 +13,22 @@ public class SelectionController : MonoBehaviour
         for(int i = 0; i < _selectionHexTiles.Length; i++){
             _selectionHexTiles[i] = Instantiate(p_hexTilePrefab);
             _selectionHexTiles[i].GetComponent<Collider2D>().enabled = false;
-            _selectionHexTiles[i].Init(p_selectionTileColor);
+            _selectionHexTiles[i].SetColor(p_selectionTileColor);
             _selectionHexTiles[i].transform.localScale *= 1.32f;
             _selectionHexTiles[i].gameObject.SetActive(false);
         }
+    }
+
+    public Vector2 GetSelectionPosition(){
+        if(_selectedHexTiles != null){
+            return _selectedHexTiles[0].transform.position;
+        }else{
+            return Vector2.zero;
+        }
+    }
+
+    public HexTile[] GetSelectedTiles(){
+        return _selectedHexTiles;
     }
 
     public void HandleSelection(Vector3 p_inputPosition, HexTile[] p_candidateTiles){

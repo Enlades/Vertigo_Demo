@@ -30,6 +30,7 @@ public class BoardController : MonoBehaviour
             {
 
                 newTile = Instantiate(_hexTilePrefab);
+                newTile.SetBoardPosition(new Vector2Int(i, j));
                 newTile.name = "HexTile_" + i + "_" + j;
                 newTile.transform.SetParent(_boardParentGO.transform);
 
@@ -51,6 +52,36 @@ public class BoardController : MonoBehaviour
         result = SetTileConnections(result);
 
         return result;
+    }
+
+    public void RotateTiles(HexTile[] p_selectedTiles, bool p_isClockwise){
+        if(p_isClockwise){
+            Vector3 firstTilePosition = p_selectedTiles[0].transform.position;
+            for (int i = 0; i < p_selectedTiles.Length; i++)
+            {
+                if (i < p_selectedTiles.Length - 1)
+                {
+                    p_selectedTiles[i].transform.position = p_selectedTiles[i + 1].transform.position;
+                }
+                else
+                {
+                    p_selectedTiles[i].transform.position = firstTilePosition;
+                }
+            }
+        }else{
+            Vector3 lastTilePosition = p_selectedTiles[p_selectedTiles.Length - 1].transform.position;
+            for (int i = p_selectedTiles.Length - 1; i >= 0; i--)
+            {
+                if (i == 0)
+                {
+                    p_selectedTiles[i].transform.position = lastTilePosition;
+                }
+                else
+                {
+                    p_selectedTiles[i].transform.position = p_selectedTiles[i - 1].transform.position;
+                }
+            }
+        }
     }
 
     private HexTile[][] SetTileConnections(HexTile[][] p_hexTiles){
