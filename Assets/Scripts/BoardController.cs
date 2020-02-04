@@ -6,6 +6,9 @@ public class BoardController : MonoBehaviour
 {
     public const float HEX_TILE_WIDTH = 1.397f;
     public const float HEX_TILE_HEIGTH = 1.276f;
+
+    public HexTile[][] GameTiles{get; private set;}
+
     private HexTile _hexTilePrefab;
 
     private GameObject _boardParentGO;
@@ -18,20 +21,19 @@ public class BoardController : MonoBehaviour
     }
 
     public HexTile[][] GenerateBoard(int p_width, int p_height){
-        HexTile[][] result = new HexTile[p_width][];
+        GameTiles = new HexTile[p_width][];
 
         HexTile newTile = null;
 
         for (int i = 0; i < p_width; i++)
         {
-            result[i] = new HexTile[p_height];
+            GameTiles[i] = new HexTile[p_height];
 
             for (int j = 0; j < p_height; j++)
             {
 
                 newTile = Instantiate(_hexTilePrefab);
                 newTile.SetBoardPosition(new Vector2Int(i, j));
-                newTile.name = "HexTile_" + i + "_" + j;
                 newTile.transform.SetParent(_boardParentGO.transform);
 
                 newTile.transform.position =
@@ -45,46 +47,40 @@ public class BoardController : MonoBehaviour
                     + (Vector3.left * (HEX_TILE_WIDTH - 1f))
                     + (i % 2 == 0 ? Vector3.zero : Vector3.up * HEX_TILE_HEIGTH * 0.49f);
 
-                result[i][j] = newTile;
+                GameTiles[i][j] = newTile;
             }
         }
 
-        result = SetTileConnections(result);
+        SetTileConnections(GameTiles);
 
-        return result;
+        return GameTiles;
     }
 
     public void RotateTiles(HexTile[] p_selectedTiles, bool p_isClockwise){
-        if(p_isClockwise){
-            Vector3 firstTilePosition = p_selectedTiles[0].transform.position;
-            for (int i = 0; i < p_selectedTiles.Length; i++)
-            {
-                if (i < p_selectedTiles.Length - 1)
-                {
-                    p_selectedTiles[i].transform.position = p_selectedTiles[i + 1].transform.position;
-                }
-                else
-                {
-                    p_selectedTiles[i].transform.position = firstTilePosition;
-                }
-            }
-        }else{
-            Vector3 lastTilePosition = p_selectedTiles[p_selectedTiles.Length - 1].transform.position;
-            for (int i = p_selectedTiles.Length - 1; i >= 0; i--)
-            {
-                if (i == 0)
-                {
-                    p_selectedTiles[i].transform.position = lastTilePosition;
-                }
-                else
-                {
-                    p_selectedTiles[i].transform.position = p_selectedTiles[i - 1].transform.position;
-                }
+        if(p_selectedTiles == null)
+            return;
+        
+        HexTile.HexTilesSwap(p_selectedTiles, p_isClockwise);
+
+        for(int i = 0; i < p_selectedTiles.Length; i++){
+            GameTiles[p_selectedTiles[i].BoardPosition.x][p_selectedTiles[i].BoardPosition.y]
+            = p_selectedTiles[i];
+        }
+    }
+
+    public void UpdateTileConnections(){
+        SetTileConnections(GameTiles);
+    }
+
+    public void CheckForComplete(){
+        for(int i = 0; i < GameTiles.Length; i++){
+            for(int j = 0; j < GameTiles[i].Length; j++){
+                
             }
         }
     }
 
-    private HexTile[][] SetTileConnections(HexTile[][] p_hexTiles){
+    private void SetTileConnections(HexTile[][] p_hexTiles){
         int width = p_hexTiles.Length;
         int height = p_hexTiles[0].Length;
 
@@ -150,7 +146,5 @@ public class BoardController : MonoBehaviour
                 }
             }
         }
-
-        return p_hexTiles;
     }
 }

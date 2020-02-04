@@ -10,8 +10,6 @@ public class GameManager : MonoBehaviour
     public InputHandler IH;
     public SelectionController SC;
 
-    private HexTile[][] _gameTiles;
-
     private Action<Vector3, HexTile[]> _selectionAction;
     private Action<bool> _swipeAction;
     private Func<Vector2> _transferSelectionPositionAction;
@@ -31,11 +29,11 @@ public class GameManager : MonoBehaviour
     }
 
     private void InitGame(){
-        _gameTiles = BC.GenerateBoard(GRM.GameBoardWidth, GRM.GameBoardHeight);
+        HexTile[][] gameTiles = BC.GenerateBoard(GRM.GameBoardWidth, GRM.GameBoardHeight);
 
-        for(int i = 0; i < _gameTiles.Length; i++){
-            for(int j = 0; j < _gameTiles[i].Length; j++){
-                _gameTiles[i][j].SetColor(GRM.GetRandomColor());
+        for(int i = 0; i < gameTiles.Length; i++){
+            for(int j = 0; j < gameTiles[i].Length; j++){
+                gameTiles[i][j].SetColor(GRM.GetRandomColor());
             }
         }
     }
@@ -54,5 +52,6 @@ public class GameManager : MonoBehaviour
 
     private void SwipeCallback(bool p_isClockwise){
         BC.RotateTiles(SC.GetSelectedTiles(), p_isClockwise);
+        BC.UpdateTileConnections();
     }
 }
