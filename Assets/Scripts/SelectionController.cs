@@ -14,7 +14,7 @@ public class SelectionController : MonoBehaviour
         {
             _selectionHexTiles[i] = Instantiate(p_hexTilePrefab);
             _selectionHexTiles[i].GetComponent<Collider2D>().enabled = false;
-            _selectionHexTiles[i].SetColor(p_selectionTileColor);
+            _selectionHexTiles[i].SetColor(p_selectionTileColor, -1);
             _selectionHexTiles[i].transform.localScale *= 1.32f;
             _selectionHexTiles[i].gameObject.SetActive(false);
         }

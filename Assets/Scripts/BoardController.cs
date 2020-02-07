@@ -78,12 +78,15 @@ public class BoardController : MonoBehaviour
         List<HexTile> sameColorHexes = new List<HexTile>();
         p_explodingHexes = null;
 
-        for (int i = 0; i < GameTiles.Length - 1; i++)
+        for (int i = 0; i < GameTiles.Length; i++)
         {
-            for (int j = 0; j < GameTiles[i].Length - 1; j++)
+            for (int j = 0; j < GameTiles[i].Length; j++)
             {
 
-                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
+                if (GameTiles[i][j] != null
+                && GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthEast) != null
+                && GameTiles[i][j].GetConnectedTile(HexTileDirection.North) != null
+                && GameTiles[i][j].HexTileColor
                 == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
                 && GameTiles[i][j].HexTileColor
                 == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthEast).HexTileColor)
@@ -92,9 +95,11 @@ public class BoardController : MonoBehaviour
                     return true;
                 }
 
-                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
+                if (GameTiles[i][j] != null
+                && GameTiles[i][j].GetConnectedTile(HexTileDirection.North) != null
+                && GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthWest) != null
+                && GameTiles[i][j].HexTileColor
                 == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
-                && i > 0
                 && GameTiles[i][j].HexTileColor
                 == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthWest).HexTileColor)
                 {
@@ -114,49 +119,11 @@ public class BoardController : MonoBehaviour
 
             GameTiles[p_explodingHexes[k].BoardPosition.x][p_explodingHexes[k].BoardPosition.y] = null;
         }
-
-        /*List<HexTile> sameColorHexes = new List<HexTile>();
-        for (int i = 0; i < GameTiles.Length - 1; i++)
-        {
-            for (int j = 0; j < GameTiles[i].Length - 1; j++)
-            {
-
-                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
-                == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
-                && GameTiles[i][j].HexTileColor
-                == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthEast).HexTileColor)
-                {
-                    HexTile[] explodingHexes = SearchOtherHexes(GameTiles[i][j]);
-
-                    for (int k = 0; k < explodingHexes.Length; k++)
-                    {
-                        explodingHexes[k].Explode();
-
-                        GameTiles[explodingHexes[k].BoardPosition.x][explodingHexes[k].BoardPosition.y] = null;
-                    }
-                }
-
-                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
-                == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
-                && i > 0
-                && GameTiles[i][j].HexTileColor
-                == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthWest).HexTileColor)
-                {
-                    HexTile[] explodingHexes = SearchOtherHexes(GameTiles[i][j]);
-
-                    for (int k = 0; k < explodingHexes.Length; k++)
-                    {
-                        explodingHexes[k].Explode();
-
-                        GameTiles[explodingHexes[k].BoardPosition.x][explodingHexes[k].BoardPosition.y] = null;
-                    }
-                }
-            }
-        }*/
     }
 
     public void RefillBoard(Color[] p_colors){
         HexTile newTile = null;
+        int randomColorIndex = -1;
         for(int i = 0; i < GameTiles.Length; i++){
             for(int j = 0; j < GameTiles[i].Length; j++){
                 if(GameTiles[i][j] == null){
@@ -164,7 +131,9 @@ public class BoardController : MonoBehaviour
                     newTile.SetBoardPosition(new Vector2Int(i, j));
                     newTile.transform.SetParent(_boardParentGO.transform);
 
-                    newTile.SetColor(p_colors[Random.Range(0, p_colors.Length)]);
+                    randomColorIndex = Random.Range(0, p_colors.Length);
+
+                    newTile.Init(p_colors[randomColorIndex], randomColorIndex);
 
                     newTile.transform.position =
                         Vector3.left * GameTiles.Length / 2f

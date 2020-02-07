@@ -7,11 +7,13 @@ public class GameResourcesManager : MonoBehaviour
     public Color[] HexTileColors;
     public Color SelectionColor;
     public int GameBoardWidth, GameBoardHeight;
+    public int ScoreMultiplier;
     // Start is called before the first frame update
     public HexTile HexTilePrefab;
+    public HexExplosionEffectController HexTileExplosionEffect;
     public LayerMask HexTileLayerMask;
-    
-    public Color GetRandomColor(){
-        return HexTileColors[Random.Range(0, HexTileColors.Length)];
+
+    public Color GetColorFromIndex(int p_index){
+        return HexTileColors[p_index];
     }
 }

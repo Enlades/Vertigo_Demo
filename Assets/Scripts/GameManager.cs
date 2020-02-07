@@ -10,10 +10,13 @@ public class GameManager : MonoBehaviour
     public InputHandler IH;
     public SelectionController SC;
     public FXController FX;
+    public ScoreController ScoreC;
 
     private Action<Vector3, HexTile[]> _selectionAction;
     private Action<bool> _swipeAction;
     private Func<Vector2> _transferSelectionPositionAction;
+
+    private bool _explosionsInProgres;
 
     private void Awake(){
         _selectionAction += HexSelectCallback;
@@ -26,36 +29,35 @@ public class GameManager : MonoBehaviour
         
         SC.Init(GRM.HexTilePrefab, GRM.SelectionColor);
 
+        _explosionsInProgres = false;
+
         InitGame();
     }
 
     private void Start(){
-        HexTile[] explodingHexes = null;
-        bool isExploding = false;
-        do
-        {
-            explodingHexes = null;
-            isExploding = BC.CheckForExplosions(out explodingHexes);
+        CheckRandomExplosions();
 
-            if(isExploding){
-                BC.ExplodeTiles(explodingHexes);
-                BC.RefillBoard(GRM.HexTileColors);
-            }
-
-        } while (isExploding);
+        ScoreC.Init();
     }
 
     private void InitGame(){
         HexTile[][] gameTiles = BC.GenerateBoard(GRM.GameBoardWidth, GRM.GameBoardHeight);
 
+        int randomColorIndex = -1;
+
         for(int i = 0; i < gameTiles.Length; i++){
             for(int j = 0; j < gameTiles[i].Length; j++){
-                gameTiles[i][j].SetColor(GRM.GetRandomColor());
+                randomColorIndex = UnityEngine.Random.Range(0, GRM.HexTileColors.Length);
+                gameTiles[i][j].Init(GRM.GetColorFromIndex(randomColorIndex), randomColorIndex);
             }
         }
     }
 
     private void Update(){
+        if(_explosionsInProgres){
+            return;
+        }
+
         IH.Tick();
     }
 
@@ -75,6 +77,8 @@ public class GameManager : MonoBehaviour
             hexTransforms[i] = SC.GetSelectedTiles()[i].transform;
         }
 
+        _explosionsInProgres = true;
+
         FX.MoveHexTiles(hexTransforms, p_isClockwise, () => {
             BC.RotateTiles(SC.GetSelectedTiles(), p_isClockwise);
             BC.UpdateTileConnections();
@@ -84,18 +88,94 @@ public class GameManager : MonoBehaviour
 
             explodingHexes = null;
             isExploding = BC.CheckForExplosions(out explodingHexes);
-
+            
             if (isExploding)
             {
                 SC.DeSelect();
                 BC.ExplodeTiles(explodingHexes);
-                BC.RefillBoard(GRM.HexTileColors);
+
+                for (int i = 0; i < explodingHexes.Length; i++)
+                {
+                    HexExplosionEffectController epxlosionEffect = Instantiate(GRM.HexTileExplosionEffect);
+                    epxlosionEffect.Init(GRM.GetColorFromIndex(explodingHexes[i].HexTileColor), explodingHexes[i].transform.position);
+                }
+
+                StartCoroutine(DelayedAction(0.4f, ()=>{
+                    BC.RefillBoard(GRM.HexTileColors);
+                    ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier * 10);
+                    StartCoroutine(CheckRandomExplosionsSmooth());
+                }));
             }else{
                 FX.MoveHexTiles(hexTransforms, !p_isClockwise, ()=>{
                     BC.RotateTiles(SC.GetSelectedTiles(), !p_isClockwise);
                     BC.UpdateTileConnections();
+
+                    _explosionsInProgres = false;
                 });
             }
         });
+    }
+    
+    private void CheckRandomExplosions(){
+        HexTile[] explodingHexes = null;
+        bool isExploding = false;
+        int infiniteBreak = 0;
+
+        do
+        {
+            explodingHexes = null;
+            isExploding = BC.CheckForExplosions(out explodingHexes);
+
+            if (isExploding)
+            {
+                BC.ExplodeTiles(explodingHexes);
+                BC.RefillBoard(GRM.HexTileColors);
+                ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier * 100);
+            }
+            infiniteBreak++;
+
+        } while (isExploding && infiniteBreak < 100);
+    }
+
+    private IEnumerator CheckRandomExplosionsSmooth(){
+        HexTile[] explodingHexes = null;
+        bool isExploding = false;
+        int infiniteBreak = 0;
+
+        do
+        {
+            explodingHexes = null;
+            isExploding = BC.CheckForExplosions(out explodingHexes);
+
+            if (isExploding)
+            {
+                BC.ExplodeTiles(explodingHexes);
+
+                for (int i = 0; i < explodingHexes.Length; i++)
+                {
+                    HexExplosionEffectController epxlosionEffect = Instantiate(GRM.HexTileExplosionEffect);
+                    epxlosionEffect.Init(GRM.GetColorFromIndex(explodingHexes[i].HexTileColor), explodingHexes[i].transform.position);
+                }
+
+                yield return new WaitForSeconds(0.3f);
+
+                BC.RefillBoard(GRM.HexTileColors);
+                ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier * 100);
+
+                yield return new WaitForSeconds(0.3f);
+            }
+            infiniteBreak++;
+
+        } while (isExploding && infiniteBreak < 100);
+
+        _explosionsInProgres = false;
+    }
+
+    private IEnumerator DelayedAction(float p_time, Action p_callback){
+        yield return new WaitForSeconds(0.4f);
+
+        if(p_callback != null){
+            p_callback.Invoke();
+        }
     }
 }

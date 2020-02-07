@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class HexTile : MonoBehaviour
 {
-    public Color HexTileColor{get; private set;}
+    public int HexTileColor{get; private set;}
     public HexTile[] ConnectedTiles{get; private set;}
     public Vector2Int BoardPosition{get; private set;}
 
@@ -21,9 +21,14 @@ public class HexTile : MonoBehaviour
         BoardPosition = p_position;
     }
     
-    public void SetColor(Color p_color){
-        HexTileColor = p_color;
+    public void SetColor(Color p_color, int p_colorIndex){
+        HexTileColor = p_colorIndex;
         _spriteRenderer.color = p_color;
+    }
+
+    public void Init(Color p_color, int p_colorIndex){
+        SetColor(p_color, p_colorIndex);
+        StartCoroutine(SmoothIntro());
     }
     
     public void SetConnection(HexTileDirection p_direction, HexTile p_tile){
@@ -76,5 +81,23 @@ public class HexTile : MonoBehaviour
             p_hexTiles[0].transform.position = lastTilePosition;
             p_hexTiles[0].BoardPosition = lastTileBoardPosition;
         }
+    }
+
+    private IEnumerator SmoothIntro(){
+        float timer = 0.2f;
+        float maxTimer = timer;
+
+        Vector3 p_startScale = transform.localScale;
+
+        while(timer > 0f){
+
+            transform.localScale = Vector3.Lerp(Vector3.zero, p_startScale, 1 - timer / maxTimer);
+
+            timer -= Time.deltaTime;
+
+            yield return null;
+        }
+
+        transform.localScale = p_startScale;
     }
 }
