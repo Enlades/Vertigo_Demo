@@ -19,6 +19,10 @@ public class ScoreController : MonoBehaviour
     }
     private int _score;
 
+    private void Awake(){
+        Score = 0;
+    }
+
     public void Init(){
         Score = 0;
     }

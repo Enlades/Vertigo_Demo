@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class HexTile : MonoBehaviour
 {
@@ -9,8 +10,10 @@ public class HexTile : MonoBehaviour
     public Vector2Int BoardPosition{get; private set;}
 
     private SpriteRenderer _spriteRenderer;
+
+    private Action<HexTile> _explosionCallback;
     
-    private void Awake(){
+    protected virtual void Awake(){
         _spriteRenderer = GetComponent<SpriteRenderer>();
 
         ConnectedTiles = new HexTile[6];
@@ -21,12 +24,14 @@ public class HexTile : MonoBehaviour
         BoardPosition = p_position;
     }
     
-    public void SetColor(Color p_color, int p_colorIndex){
+    public virtual void SetColor(Color p_color, int p_colorIndex){
         HexTileColor = p_colorIndex;
         _spriteRenderer.color = p_color;
     }
 
-    public void Init(Color p_color, int p_colorIndex){
+    public virtual void Init(Color p_color, int p_colorIndex,Action<HexTile> p_explosionCallback){
+        _explosionCallback = p_explosionCallback;
+
         SetColor(p_color, p_colorIndex);
         StartCoroutine(SmoothIntro());
     }
@@ -50,6 +55,9 @@ public class HexTile : MonoBehaviour
     }
 
     public void Explode(){
+        if(_explosionCallback != null){
+            _explosionCallback.Invoke(this);
+        }
         Destroy(gameObject);
     }
 

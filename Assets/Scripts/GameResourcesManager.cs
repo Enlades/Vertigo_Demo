@@ -8,8 +8,10 @@ public class GameResourcesManager : MonoBehaviour
     public Color SelectionColor;
     public int GameBoardWidth, GameBoardHeight;
     public int ScoreMultiplier;
+    public int BombScoreThreshold;
     // Start is called before the first frame update
     public HexTile HexTilePrefab;
+    public HexBomb HexBombPrefab;
     public HexExplosionEffectController HexTileExplosionEffect;
     public LayerMask HexTileLayerMask;
 

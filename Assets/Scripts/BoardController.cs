@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class BoardController : MonoBehaviour
 {
@@ -121,19 +122,65 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    public void RefillBoard(Color[] p_colors){
+    public void RefillBoard(Color[] p_colors)
+    {
         HexTile newTile = null;
         int randomColorIndex = -1;
-        for(int i = 0; i < GameTiles.Length; i++){
-            for(int j = 0; j < GameTiles[i].Length; j++){
-                if(GameTiles[i][j] == null){
+        for (int i = 0; i < GameTiles.Length; i++)
+        {
+            for (int j = 0; j < GameTiles[i].Length; j++)
+            {
+                if (GameTiles[i][j] == null)
+                {
                     newTile = Instantiate(_hexTilePrefab);
                     newTile.SetBoardPosition(new Vector2Int(i, j));
                     newTile.transform.SetParent(_boardParentGO.transform);
 
-                    randomColorIndex = Random.Range(0, p_colors.Length);
+                    randomColorIndex = UnityEngine.Random.Range(0, p_colors.Length);
 
-                    newTile.Init(p_colors[randomColorIndex], randomColorIndex);
+                    newTile.Init(p_colors[randomColorIndex], randomColorIndex, null);
+
+                    newTile.transform.position =
+                        Vector3.left * GameTiles.Length / 2f
+                        + Vector3.down * GameTiles[i].Length / 2f
+                        + Vector3.right * HEX_TILE_WIDTH / 2f
+                        + Vector3.up * HEX_TILE_HEIGTH / 2f
+                        + (Vector3.right * i * 0.79f) * HEX_TILE_WIDTH
+                        + (Vector3.up * j) * HEX_TILE_HEIGTH
+                        + (Vector3.down * (HEX_TILE_HEIGTH - 1f))
+                        + (Vector3.left * (HEX_TILE_WIDTH - 1f))
+                        + (i % 2 == 0 ? Vector3.zero : Vector3.up * HEX_TILE_HEIGTH * 0.49f);
+
+                    GameTiles[i][j] = newTile;
+                }
+            }
+        }
+
+        SetTileConnections(GameTiles);
+    }
+    public void RefillBoardWitBombs(Color[] p_colors, HexBomb p_bombPrefab, Action<HexTile> p_callback)
+    {
+        HexTile newTile = null;
+        int randomColorIndex = -1;
+        bool bombPlaced = false;
+        for (int i = 0; i < GameTiles.Length; i++)
+        {
+            for (int j = 0; j < GameTiles[i].Length; j++)
+            {
+                if (GameTiles[i][j] == null)
+                {
+                    if(!bombPlaced){
+                        newTile = Instantiate(p_bombPrefab);
+                        bombPlaced = true;
+                    }else{
+                        newTile = Instantiate(_hexTilePrefab);
+                    }
+                    newTile.SetBoardPosition(new Vector2Int(i, j));
+                    newTile.transform.SetParent(_boardParentGO.transform);
+
+                    randomColorIndex = UnityEngine.Random.Range(0, p_colors.Length);
+
+                    newTile.Init(p_colors[randomColorIndex], randomColorIndex, p_callback);
 
                     newTile.transform.position =
                         Vector3.left * GameTiles.Length / 2f
