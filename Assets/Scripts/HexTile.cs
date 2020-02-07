@@ -10,8 +10,6 @@ public class HexTile : MonoBehaviour
     public Vector2Int BoardPosition{get; private set;}
 
     private SpriteRenderer _spriteRenderer;
-
-    private Action<HexTile> _explosionCallback;
     
     protected virtual void Awake(){
         _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -30,8 +28,6 @@ public class HexTile : MonoBehaviour
     }
 
     public virtual void Init(Color p_color, int p_colorIndex,Action<HexTile> p_explosionCallback){
-        _explosionCallback = p_explosionCallback;
-
         SetColor(p_color, p_colorIndex);
         StartCoroutine(SmoothIntro());
     }
@@ -54,10 +50,7 @@ public class HexTile : MonoBehaviour
         return false;
     }
 
-    public void Explode(){
-        if(_explosionCallback != null){
-            _explosionCallback.Invoke(this);
-        }
+    public virtual void Explode(){
         Destroy(gameObject);
     }
 

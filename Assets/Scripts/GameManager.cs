@@ -15,16 +15,18 @@ public class GameManager : MonoBehaviour
     private Action<Vector3, HexTile[]> _selectionAction;
     private Action<bool> _swipeAction;
     private Func<Vector2> _transferSelectionPositionAction;
-    private Action<HexTile> _bombExplodedAction;
+    private Action<HexTile> _hexTileExplosionCallback;
+    private Action _playerMadeMove;
     
     private bool _explosionsInProgres;
+    private bool _gameOver;
     private int _bombCount;
 
     private void Awake(){
         _selectionAction += HexSelectCallback;
         _transferSelectionPositionAction += TransferSelectionPositionCallback;
         _swipeAction += SwipeCallback;
-        _bombExplodedAction += BombBexplodedCallback;
+        _hexTileExplosionCallback += BombBexplodedCallback;
 
         BC.Init(GRM.HexTilePrefab);
         IH.Init(LayerMask.NameToLayer(GRM.HexTileLayerMask.ToString())
@@ -33,6 +35,7 @@ public class GameManager : MonoBehaviour
         SC.Init(GRM.HexTilePrefab, GRM.SelectionColor);
 
         _explosionsInProgres = false;
+        _gameOver = false;
 
         InitGame();
     }
@@ -53,13 +56,13 @@ public class GameManager : MonoBehaviour
         for(int i = 0; i < gameTiles.Length; i++){
             for(int j = 0; j < gameTiles[i].Length; j++){
                 randomColorIndex = UnityEngine.Random.Range(0, GRM.HexTileColors.Length);
-                gameTiles[i][j].Init(GRM.GetColorFromIndex(randomColorIndex), randomColorIndex, _bombExplodedAction);
+                gameTiles[i][j].Init(GRM.GetColorFromIndex(randomColorIndex), randomColorIndex, null);
             }
         }
     }
 
     private void Update(){
-        if(_explosionsInProgres){
+        if(_explosionsInProgres || _gameOver){
             return;
         }
 
@@ -99,6 +102,10 @@ public class GameManager : MonoBehaviour
                 SC.DeSelect();
                 BC.ExplodeTiles(explodingHexes);
                 ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier);
+
+                if(_playerMadeMove != null){
+                    _playerMadeMove.Invoke();
+                }
 
                 for (int i = 0; i < explodingHexes.Length; i++)
                 {
@@ -148,7 +155,8 @@ public class GameManager : MonoBehaviour
         if (ScoreC.Score > GRM.BombScoreThreshold * _bombCount)
         {
             _bombCount++;
-            BC.RefillBoardWitBombs(GRM.HexTileColors, GRM.HexBombPrefab, _bombExplodedAction);
+            HexBomb newBomb = BC.RefillBoardWitBombs(GRM.HexTileColors, GRM.HexBombPrefab, _hexTileExplosionCallback);
+            _playerMadeMove += newBomb.DecrementCounter;
         }
         else
         {
@@ -163,6 +171,10 @@ public class GameManager : MonoBehaviour
 
         do
         {
+            if(_gameOver){
+                yield break;
+            }
+
             explodingHexes = null;
             isExploding = BC.CheckForExplosions(out explodingHexes);
 
@@ -193,7 +205,9 @@ public class GameManager : MonoBehaviour
 
     private void BombBexplodedCallback(HexTile p_hexBomb)
     {
+        _gameOver = true;
 
+        BC.ExplodeEveryTile(GRM.HexTileExplosionEffect, GRM.HexTileColors);
     }
 
     private IEnumerator DelayedAction(float p_time, Action p_callback){

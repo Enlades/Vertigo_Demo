@@ -21,6 +21,8 @@ public class HexBomb : HexTile
     private SpriteRenderer _innerShadow;
     private TextMeshPro _numberText;
 
+    private Action<HexTile> _bombExplodeCallback;
+
     protected override void Awake(){
         base.Awake();
 
@@ -37,13 +39,28 @@ public class HexBomb : HexTile
     public override void Init(Color p_color, int p_colorIndex, Action<HexTile> p_explosionCallback){
         base.Init(p_color, p_colorIndex,p_explosionCallback);
 
-        Counter = UnityEngine.Random.Range(5, 10);
+        _bombExplodeCallback = p_explosionCallback;
+
+        Counter = UnityEngine.Random.Range(1, 2);
     }
 
-    public void DecrementCounter(Action p_callback){
+    public void DecrementCounter(){
         Counter--;
-        if(p_callback != null && Counter <= 0){
-            p_callback.Invoke();
+
+        if(Counter <= 0){
+            BombExplode();
+        }
+    }
+
+    public override void Explode(){
+        BombExplode();
+        Destroy(gameObject);
+    }
+
+    private void BombExplode(){
+        if (_bombExplodeCallback != null && Counter <= 0)
+        {
+            _bombExplodeCallback.Invoke(this);
         }
     }
 }

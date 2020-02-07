@@ -158,9 +158,10 @@ public class BoardController : MonoBehaviour
 
         SetTileConnections(GameTiles);
     }
-    public void RefillBoardWitBombs(Color[] p_colors, HexBomb p_bombPrefab, Action<HexTile> p_callback)
+    public HexBomb RefillBoardWitBombs(Color[] p_colors, HexBomb p_bombPrefab, Action<HexTile> p_callback)
     {
         HexTile newTile = null;
+        HexBomb newBomb = null;
         int randomColorIndex = -1;
         bool bombPlaced = false;
         for (int i = 0; i < GameTiles.Length; i++)
@@ -171,6 +172,7 @@ public class BoardController : MonoBehaviour
                 {
                     if(!bombPlaced){
                         newTile = Instantiate(p_bombPrefab);
+                        newBomb = (HexBomb)newTile;
                         bombPlaced = true;
                     }else{
                         newTile = Instantiate(_hexTilePrefab);
@@ -180,7 +182,11 @@ public class BoardController : MonoBehaviour
 
                     randomColorIndex = UnityEngine.Random.Range(0, p_colors.Length);
 
-                    newTile.Init(p_colors[randomColorIndex], randomColorIndex, p_callback);
+                    if(newTile is HexBomb){
+                        newTile.Init(p_colors[randomColorIndex], randomColorIndex, p_callback);
+                    }else{
+                        newTile.Init(p_colors[randomColorIndex], randomColorIndex, null);
+                    }
 
                     newTile.transform.position =
                         Vector3.left * GameTiles.Length / 2f
@@ -199,6 +205,12 @@ public class BoardController : MonoBehaviour
         }
 
         SetTileConnections(GameTiles);
+
+        return newBomb;
+    }
+
+    public void ExplodeEveryTile(HexExplosionEffectController p_explosionEffect, Color[] p_hexColors){
+        StartCoroutine(SmoothGameOver(p_explosionEffect, p_hexColors));
     }
 
     private HexTile[] SearchOtherHexes(HexTile p_hexTile){
@@ -296,6 +308,26 @@ public class BoardController : MonoBehaviour
                     {
                         p_hexTiles[i][j].SetConnection(HexTileDirection.NorthWest, p_hexTiles[i - 1][j + 1]);
                     }
+                }
+            }
+        }
+    }
+
+    private IEnumerator SmoothGameOver(HexExplosionEffectController p_explosionEffect, Color[] p_hexColors){
+        HexExplosionEffectController epxlosionEffect = null;
+        for (int i = 0; i < GameTiles.Length; i++)
+        {
+            for (int j = 0; j < GameTiles[i].Length; j++)
+            {
+                if(GameTiles[i][j] != null){
+                    GameTiles[i][j].Explode();
+
+                    epxlosionEffect = Instantiate(p_explosionEffect);
+                    epxlosionEffect.Init(p_hexColors[GameTiles[i][j].HexTileColor], GameTiles[i][j].transform.position);
+                }
+
+                for(int k = 0; k < UnityEngine.Random.Range(2, 4); k ++){
+                    yield return new WaitForFixedUpdate();
                 }
             }
         }
