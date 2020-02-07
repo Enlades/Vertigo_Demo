@@ -10,7 +10,8 @@ public class SelectionController : MonoBehaviour
     public void Init(HexTile p_hexTilePrefab, Color p_selectionTileColor){
         _selectionHexTiles = new HexTile[3];
 
-        for(int i = 0; i < _selectionHexTiles.Length; i++){
+        for (int i = 0; i < _selectionHexTiles.Length; i++)
+        {
             _selectionHexTiles[i] = Instantiate(p_hexTilePrefab);
             _selectionHexTiles[i].GetComponent<Collider2D>().enabled = false;
             _selectionHexTiles[i].SetColor(p_selectionTileColor);
@@ -48,6 +49,15 @@ public class SelectionController : MonoBehaviour
         _selectedHexTiles = GetTilesFromConnectionDirection(selectionDirection, selectedTile);
 
         ConstructSelectionTiles(_selectedHexTiles);
+    }
+
+    public void DeSelect(){
+        for (int i = 0; i < _selectionHexTiles.Length; i++)
+        {
+            _selectionHexTiles[i].gameObject.SetActive(false);
+        }
+
+        _selectedHexTiles = null;
     }
 
     private HexTileDirection FindSelectionDirection(Vector3 p_inputPosition, HexTile p_selectedTile){

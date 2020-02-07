@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public BoardController BC;
     public InputHandler IH;
     public SelectionController SC;
+    public FXController FX;
 
     private Action<Vector3, HexTile[]> _selectionAction;
     private Action<bool> _swipeAction;
@@ -26,6 +27,22 @@ public class GameManager : MonoBehaviour
         SC.Init(GRM.HexTilePrefab, GRM.SelectionColor);
 
         InitGame();
+    }
+
+    private void Start(){
+        HexTile[] explodingHexes = null;
+        bool isExploding = false;
+        do
+        {
+            explodingHexes = null;
+            isExploding = BC.CheckForExplosions(out explodingHexes);
+
+            if(isExploding){
+                BC.ExplodeTiles(explodingHexes);
+                BC.RefillBoard(GRM.HexTileColors);
+            }
+
+        } while (isExploding);
     }
 
     private void InitGame(){
@@ -51,7 +68,34 @@ public class GameManager : MonoBehaviour
     }
 
     private void SwipeCallback(bool p_isClockwise){
-        BC.RotateTiles(SC.GetSelectedTiles(), p_isClockwise);
-        BC.UpdateTileConnections();
+        Transform[] hexTransforms = new Transform[SC.GetSelectedTiles().Length];
+
+        for (int i = 0; i < hexTransforms.Length; i++)
+        {
+            hexTransforms[i] = SC.GetSelectedTiles()[i].transform;
+        }
+
+        FX.MoveHexTiles(hexTransforms, p_isClockwise, () => {
+            BC.RotateTiles(SC.GetSelectedTiles(), p_isClockwise);
+            BC.UpdateTileConnections();
+
+            HexTile[] explodingHexes = null;
+            bool isExploding = false;
+
+            explodingHexes = null;
+            isExploding = BC.CheckForExplosions(out explodingHexes);
+
+            if (isExploding)
+            {
+                SC.DeSelect();
+                BC.ExplodeTiles(explodingHexes);
+                BC.RefillBoard(GRM.HexTileColors);
+            }else{
+                FX.MoveHexTiles(hexTransforms, !p_isClockwise, ()=>{
+                    BC.RotateTiles(SC.GetSelectedTiles(), !p_isClockwise);
+                    BC.UpdateTileConnections();
+                });
+            }
+        });
     }
 }

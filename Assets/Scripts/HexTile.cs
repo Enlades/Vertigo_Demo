@@ -44,6 +44,10 @@ public class HexTile : MonoBehaviour
         return false;
     }
 
+    public void Explode(){
+        Destroy(gameObject);
+    }
+
     public static void HexTilesSwap(HexTile[] p_hexTiles, bool p_isClockwise)
     {
         if (p_isClockwise)

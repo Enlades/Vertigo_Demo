@@ -514,6 +514,7 @@ GameObject:
   - component: {fileID: 1722515818}
   - component: {fileID: 1722515817}
   - component: {fileID: 1722515819}
+  - component: {fileID: 1722515820}
   m_Layer: 0
   m_Name: Singletons
   m_TagString: Untagged
@@ -549,6 +550,7 @@ MonoBehaviour:
   BC: {fileID: 1722515814}
   IH: {fileID: 1722515817}
   SC: {fileID: 1722515819}
+  FX: {fileID: 1722515820}
 --- !u!4 &1722515816
 Transform:
   m_ObjectHideFlags: 0
@@ -610,6 +612,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9f132ab0821a90340bc117169daa19a6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1722515820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1722515813}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f2e652db54cfb14c8229841728b3cc4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1734616139 stripped

@@ -56,13 +56,15 @@ public class BoardController : MonoBehaviour
         return GameTiles;
     }
 
-    public void RotateTiles(HexTile[] p_selectedTiles, bool p_isClockwise){
-        if(p_selectedTiles == null)
+    public void RotateTiles(HexTile[] p_selectedTiles, bool p_isClockwise)
+    {
+        if (p_selectedTiles == null)
             return;
-        
+
         HexTile.HexTilesSwap(p_selectedTiles, p_isClockwise);
 
-        for(int i = 0; i < p_selectedTiles.Length; i++){
+        for (int i = 0; i < p_selectedTiles.Length; i++)
+        {
             GameTiles[p_selectedTiles[i].BoardPosition.x][p_selectedTiles[i].BoardPosition.y]
             = p_selectedTiles[i];
         }
@@ -72,12 +74,147 @@ public class BoardController : MonoBehaviour
         SetTileConnections(GameTiles);
     }
 
-    public void CheckForComplete(){
-        for(int i = 0; i < GameTiles.Length; i++){
-            for(int j = 0; j < GameTiles[i].Length; j++){
-                
+    public bool CheckForExplosions(out HexTile[] p_explodingHexes){
+        List<HexTile> sameColorHexes = new List<HexTile>();
+        p_explodingHexes = null;
+
+        for (int i = 0; i < GameTiles.Length - 1; i++)
+        {
+            for (int j = 0; j < GameTiles[i].Length - 1; j++)
+            {
+
+                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
+                && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthEast).HexTileColor)
+                {
+                    p_explodingHexes = SearchOtherHexes(GameTiles[i][j]);
+                    return true;
+                }
+
+                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
+                && i > 0
+                && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthWest).HexTileColor)
+                {
+                    p_explodingHexes = SearchOtherHexes(GameTiles[i][j]);
+                    return true;
+                }
             }
         }
+        return false;
+    }
+
+    public void ExplodeTiles(HexTile[] p_explodingHexes){
+
+        for (int k = 0; k < p_explodingHexes.Length; k++)
+        {
+            p_explodingHexes[k].Explode();
+
+            GameTiles[p_explodingHexes[k].BoardPosition.x][p_explodingHexes[k].BoardPosition.y] = null;
+        }
+
+        /*List<HexTile> sameColorHexes = new List<HexTile>();
+        for (int i = 0; i < GameTiles.Length - 1; i++)
+        {
+            for (int j = 0; j < GameTiles[i].Length - 1; j++)
+            {
+
+                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
+                && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthEast).HexTileColor)
+                {
+                    HexTile[] explodingHexes = SearchOtherHexes(GameTiles[i][j]);
+
+                    for (int k = 0; k < explodingHexes.Length; k++)
+                    {
+                        explodingHexes[k].Explode();
+
+                        GameTiles[explodingHexes[k].BoardPosition.x][explodingHexes[k].BoardPosition.y] = null;
+                    }
+                }
+
+                if (GameTiles[i][j] != null && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.North).HexTileColor
+                && i > 0
+                && GameTiles[i][j].HexTileColor
+                == GameTiles[i][j].GetConnectedTile(HexTileDirection.NorthWest).HexTileColor)
+                {
+                    HexTile[] explodingHexes = SearchOtherHexes(GameTiles[i][j]);
+
+                    for (int k = 0; k < explodingHexes.Length; k++)
+                    {
+                        explodingHexes[k].Explode();
+
+                        GameTiles[explodingHexes[k].BoardPosition.x][explodingHexes[k].BoardPosition.y] = null;
+                    }
+                }
+            }
+        }*/
+    }
+
+    public void RefillBoard(Color[] p_colors){
+        HexTile newTile = null;
+        for(int i = 0; i < GameTiles.Length; i++){
+            for(int j = 0; j < GameTiles[i].Length; j++){
+                if(GameTiles[i][j] == null){
+                    newTile = Instantiate(_hexTilePrefab);
+                    newTile.SetBoardPosition(new Vector2Int(i, j));
+                    newTile.transform.SetParent(_boardParentGO.transform);
+
+                    newTile.SetColor(p_colors[Random.Range(0, p_colors.Length)]);
+
+                    newTile.transform.position =
+                        Vector3.left * GameTiles.Length / 2f
+                        + Vector3.down * GameTiles[i].Length / 2f
+                        + Vector3.right * HEX_TILE_WIDTH / 2f
+                        + Vector3.up * HEX_TILE_HEIGTH / 2f
+                        + (Vector3.right * i * 0.79f) * HEX_TILE_WIDTH
+                        + (Vector3.up * j) * HEX_TILE_HEIGTH
+                        + (Vector3.down * (HEX_TILE_HEIGTH - 1f))
+                        + (Vector3.left * (HEX_TILE_WIDTH - 1f))
+                        + (i % 2 == 0 ? Vector3.zero : Vector3.up * HEX_TILE_HEIGTH * 0.49f);
+
+                    GameTiles[i][j] = newTile;
+                }
+            }
+        }
+
+        SetTileConnections(GameTiles);
+    }
+
+    private HexTile[] SearchOtherHexes(HexTile p_hexTile){
+        List<HexTile> hexesToLook = new List<HexTile>();
+        HexTile currentTile = null;
+        int index = 0;
+
+        hexesToLook.Add(p_hexTile);
+
+        int infiniteBreaker = 0;
+
+        while(index < hexesToLook.Count && infiniteBreaker < 100){
+            currentTile = hexesToLook[index];
+
+            for(int i = 0; i < currentTile.ConnectedTiles.Length; i++){
+                if(currentTile.ConnectedTiles[i] != null 
+                && currentTile.ConnectedTiles[i].HexTileColor == currentTile.HexTileColor
+                && !hexesToLook.Contains(currentTile.ConnectedTiles[i])){
+                    hexesToLook.Add(currentTile.ConnectedTiles[i]);
+                }
+            }
+
+            index++;
+
+            infiniteBreaker++;
+        }
+
+        if(infiniteBreaker >= 100){
+            Debug.Log("Search infinite");
+        }
+
+        return hexesToLook.ToArray();
     }
 
     private void SetTileConnections(HexTile[][] p_hexTiles){
