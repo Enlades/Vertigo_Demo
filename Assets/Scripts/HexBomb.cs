@@ -41,7 +41,7 @@ public class HexBomb : HexTile
 
         _bombExplodeCallback = p_explosionCallback;
 
-        Counter = UnityEngine.Random.Range(1, 2);
+        Counter = UnityEngine.Random.Range(6, 10);
     }
 
     public void DecrementCounter(){
@@ -60,7 +60,10 @@ public class HexBomb : HexTile
     private void BombExplode(){
         if (_bombExplodeCallback != null && Counter <= 0)
         {
+            Debug.Log("Bum");
             _bombExplodeCallback.Invoke(this);
+        }else{
+            _bombExplodeCallback = null;
         }
     }
 }

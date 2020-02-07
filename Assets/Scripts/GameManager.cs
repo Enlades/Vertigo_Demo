@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public SelectionController SC;
     public FXController FX;
     public ScoreController ScoreC;
+    public GameOverUIController GOUIC;
 
     private Action<Vector3, HexTile[]> _selectionAction;
     private Action<bool> _swipeAction;
@@ -33,6 +34,7 @@ public class GameManager : MonoBehaviour
         , _selectionAction, _transferSelectionPositionAction, _swipeAction);
         
         SC.Init(GRM.HexTilePrefab, GRM.SelectionColor);
+        GOUIC.Init(GRM.HexTileColors);
 
         _explosionsInProgres = false;
         _gameOver = false;
@@ -103,10 +105,6 @@ public class GameManager : MonoBehaviour
                 BC.ExplodeTiles(explodingHexes);
                 ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier);
 
-                if(_playerMadeMove != null){
-                    _playerMadeMove.Invoke();
-                }
-
                 for (int i = 0; i < explodingHexes.Length; i++)
                 {
                     HexExplosionEffectController epxlosionEffect = Instantiate(GRM.HexTileExplosionEffect);
@@ -114,6 +112,11 @@ public class GameManager : MonoBehaviour
                 }
 
                 StartCoroutine(DelayedAction(0.4f, ()=>{
+
+                    if (_playerMadeMove != null)
+                    {
+                        _playerMadeMove.Invoke();
+                    }
 
                     RefillBoard();
 
@@ -188,11 +191,11 @@ public class GameManager : MonoBehaviour
                     epxlosionEffect.Init(GRM.GetColorFromIndex(explodingHexes[i].HexTileColor), explodingHexes[i].transform.position);
                 }
 
+                ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier);
+
                 yield return new WaitForSeconds(0.3f);
 
                 RefillBoard();
-
-                ScoreC.AddSore(explodingHexes.Length * GRM.ScoreMultiplier);
 
                 yield return new WaitForSeconds(0.3f);
             }
@@ -207,11 +210,15 @@ public class GameManager : MonoBehaviour
     {
         _gameOver = true;
 
-        BC.ExplodeEveryTile(GRM.HexTileExplosionEffect, GRM.HexTileColors);
+        StartCoroutine(DelayedAction(0.5f, ()=>{
+            BC.ExplodeEveryTile(GRM.HexTileExplosionEffect, GRM.HexTileColors);
+        }));
+
+        StartCoroutine(DelayedAction(2f, ()=>{GOUIC.ShowUI();}));
     }
 
     private IEnumerator DelayedAction(float p_time, Action p_callback){
-        yield return new WaitForSeconds(0.4f);
+        yield return new WaitForSeconds(p_time);
 
         if(p_callback != null){
             p_callback.Invoke();

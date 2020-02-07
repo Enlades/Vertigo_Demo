@@ -319,14 +319,15 @@ public class BoardController : MonoBehaviour
         {
             for (int j = 0; j < GameTiles[i].Length; j++)
             {
-                if(GameTiles[i][j] != null){
+                if (GameTiles[i][j] != null)
+                {
                     GameTiles[i][j].Explode();
 
                     epxlosionEffect = Instantiate(p_explosionEffect);
                     epxlosionEffect.Init(p_hexColors[GameTiles[i][j].HexTileColor], GameTiles[i][j].transform.position);
                 }
 
-                for(int k = 0; k < UnityEngine.Random.Range(2, 4); k ++){
+                for(int k = 0; k < UnityEngine.Random.Range(1, 2); k ++){
                     yield return new WaitForFixedUpdate();
                 }
             }

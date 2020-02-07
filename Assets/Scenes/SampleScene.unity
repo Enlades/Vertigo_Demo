@@ -364,7 +364,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0, y: 1.4, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -479,6 +479,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 676666035}
+  - component: {fileID: 676666036}
   m_Layer: 5
   m_Name: GameOverPanel
   m_TagString: Untagged
@@ -507,6 +508,25 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!95 &676666036
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 676666034}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 420a748ee1b41174182fc45c19f87fa7, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &899674141
 GameObject:
   m_ObjectHideFlags: 0
@@ -965,6 +985,7 @@ MonoBehaviour:
   SC: {fileID: 1722515819}
   FX: {fileID: 1722515820}
   ScoreC: {fileID: 1722515821}
+  GOUIC: {fileID: 1722515822}
 --- !u!4 &1722515816
 Transform:
   m_ObjectHideFlags: 0
@@ -1012,7 +1033,7 @@ MonoBehaviour:
   SelectionColor: {r: 1, g: 1, b: 1, a: 1}
   GameBoardWidth: 8
   GameBoardHeight: 9
-  ScoreMultiplier: 100
+  ScoreMultiplier: 10
   BombScoreThreshold: 1000
   HexTilePrefab: {fileID: 102793421}
   HexBombPrefab: {fileID: 1737124007289224496}
